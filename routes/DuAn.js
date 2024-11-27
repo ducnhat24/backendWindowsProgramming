@@ -97,16 +97,17 @@ DuAnRouter.post('/insertallfromtemp', async (req, res) => {
 
 DuAnRouter.post('/saveprojectwithdifferentname', async (req, res) => {
     try {
-        const oldProjectID = req.body.oldProjectID;
-        const newProjectID = req.body.ID;
-        const tempProjectID = req.body.Name;
-        const timeCreated = req.body.TimeCreate;
+        const oldProjectID = req.body.OldProjectID;
+        const newProjectID = req.body.Project.ID;
+        const newProjectName = req.body.Project.Name;
+        const timeCreated = req.body.Project.TimeCreate;
         const duAn = new DuAn({
             MaDuAn: newProjectID,
-            TenDuAn: tempProjectID,
+            TenDuAn: newProjectName,
             NgayThucHien: timeCreated,
             isSaved: true
         });
+
         //insert the new duAn to DuAn
         await duAn.save();
         //traverse through all tables, if the row has MaDuAn is the same as oldProjectID, copy that row then insert again with newProjectID
@@ -115,16 +116,29 @@ DuAnRouter.post('/saveprojectwithdifferentname', async (req, res) => {
         const linhKien = await LinhKien.find({ MaDuAn: oldProjectID });
         const loi = await Loi.find({ MaDuAn: oldProjectID });
         const nhanVien = await NhanVien.find({ MaDuAn: oldProjectID });
+        const maCongViecDuAnBase = newProjectName + timeCreated + '_';
         for (let i = 0; i < congViec.length; i++) {
+            const maCongViecDuAn = maCongViecDuAnBase + i;
             const congViecNew = new CongViec({
-                MaDuAn: newProjectID,
-                MaCVDuan: congViec[i].MaCVDuan,
-                TenCongViec: congViec[i].TenCongViec,
-                NguoiThucHien: congViec[i].NguoiThucHien,
-                NgayBatDau: congViec[i].NgayBatDau,
-                NgayKetThuc: congViec[i].NgayKetThuc,
-                TienDo: congViec[i].TienDo,
-                isSaved: true
+                MaCvDuAn: maCongViecDuAn,
+                STT: congViec[i].STT,    
+                TenDichVu: congViec[i].TenDichVu,
+                NgayThucHien: congViec[i].NgayThucHien,
+                HoTenKH: congViec[i].HoTenKH,
+                SDT: congViec[i].SDT,
+                DiaChi: congViec[i].DiaChi,
+                MaNV: congViec[i].MaNV,
+                TenNV: congViec[i].TenNV,
+                MaLinhKien: congViec[i].MaLinhKien,
+                TenLinhKien: congViec[i].TenLinhKien,
+                SoLuongLinhKien: congViec[i].SoLuongLinhKien,
+                MaLoi: congViec[i].MaLoi,
+                TenLoi: congViec[i].TenLoi,
+                SoLuongLoi: congViec[i].SoLuongLoi,
+                PhiDichVu: congViec[i].PhiDichVu,
+                GhiChu: congViec[i].GhiChu,
+                MaDuAn:  newProjectID,
+                isSaved: congViec[i].isSaved
             });
             await congViecNew.save();
         }
@@ -138,6 +152,7 @@ DuAnRouter.post('/saveprojectwithdifferentname', async (req, res) => {
             });
             await khachHangNew.save();
         }
+
         for (let i = 0; i < linhKien.length; i++) {
             const linhKienNew = new LinhKien({
                 MaDuAn: newProjectID,
@@ -147,6 +162,7 @@ DuAnRouter.post('/saveprojectwithdifferentname', async (req, res) => {
             });
             await linhKienNew.save();
         }
+
         for (let i = 0; i < loi.length; i++) {
             const loiNew = new Loi({
                 MaDuAn: newProjectID,
@@ -155,22 +171,46 @@ DuAnRouter.post('/saveprojectwithdifferentname', async (req, res) => {
             });
             await loiNew.save();
         }
+        const maNhanVienDuAnBase = newProjectName + timeCreated + '_';
         for (let i = 0; i < nhanVien.length; i++) {
             const nhanVienNew = new NhanVien({
-                MaDuAn: newProjectID,
-                TenNhanVien: nhanVien[i].TenNhanVien,
-                ChucVu: nhanVien[i].ChucVu,
-                SoDienThoai: nhanVien[i].SoDienThoai,
-                Email: nhanVien[i].Email,
-                DiaChi: nhanVien[i].DiaChi,
-                NgaySinh: nhanVien[i].NgaySinh,
+                MaNVDuAn: maNhanVienDuAnBase + i,
+                MaNV: nhanVien[i].MaNV,
+                HoTen: nhanVien[i].HoTen,
                 GioiTinh: nhanVien[i].GioiTinh,
-                isSaved: true
+                NgaySinh: nhanVien[i].NgaySinh,
+                DiaChi: nhanVien[i].DiaChi,
+                SDT: nhanVien[i].SDT,
+                Email: nhanVien[i].Email,
+                PhongBan: nhanVien[i].PhongBan,
+                CCCD: nhanVien[i].CCCD,
+                TrangThai: nhanVien[i].TrangThai,
+                MaDuAn: newProjectID,
+                AnhDaiDien: nhanVien[i].AnhDaiDien,
+                isSaved: true,
             });
             await nhanVienNew.save();
         }
         res.json({ message: "Success" });
 
+    }
+    catch (error) {
+        res.json({ message: error });
+    }
+}
+);
+
+DuAnRouter.post('/deleteproject', async (req, res) => {
+    try {
+        const projectID = req.body.ID;
+        console.log(projectID);
+        await DuAn.deleteMany({ MaDuAn: projectID });
+        await CongViec.deleteMany({ MaDuAn: projectID });
+        await KhachHang.deleteMany({ MaDuAn: projectID });
+        await LinhKien.deleteMany({ MaDuAn: projectID });
+        await Loi.deleteMany({ MaDuAn: projectID });
+        await NhanVien.deleteMany({ MaDuAn: projectID });
+        res.json({ message: "Success" });
     }
     catch (error) {
         res.json({ message: error });

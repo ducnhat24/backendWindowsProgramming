@@ -10,7 +10,6 @@ CongViecRouter.get('/all', async (req, res) => {
         if (isSaved) {
             // const congViec = await CongViec.find({ MaDuAn: maDuAn, isSaved: isSaved });
             const congViec = await CongViec.find({ MaDuAn: maDuAn });
-
             res.json(congViec);
         }
         else {
@@ -34,17 +33,7 @@ CongViecRouter.post('/deletetask', async (req, res) => {
     }
 });
 
-CongViecRouter.post('/deleteproject', async (req, res) => {
-    try {
-        const maDuAn = req.query.maduan;
-        await CongViec.deleteMany({ MaDuAn: maDuAn });
-        res.json({ message: "Deleted Project" });
-    }
-    catch (error) {
-        res.json({ message: error });
-    }
-}
-);
+
 
 CongViecRouter.get('/maxstt', async (req, res) => {
     try {
@@ -53,11 +42,9 @@ CongViecRouter.get('/maxstt', async (req, res) => {
         // if maxSTT is empty, return 0
         console.log(maxSTT);
         if (maxSTT.length === 0) {
-            console.log("Empty");
             res.json({ stt: 0 });
         }
         else {
-            console.log("Not empty");
             res.json(maxSTT);
         }
     }
@@ -78,9 +65,9 @@ CongViecRouter.post('/inserttask', async (req, res) => {
             DiaChi: req.body.DiaChi,
             MaNV: req.body.MaNV,
             TenNV: req.body.TenNV,
-            MaLinhKien: req.body.MaLK,
-            TenLinhKien: req.body.TenLK,
-            SoLuongLinhKien: req.body.SoLuongLK,
+            MaLinhKien: req.body.MaLinhKien,
+            TenLinhKien: req.body.TenLinhKien,
+            SoLuongLinhKien: req.body.SoLuongLinhKien,
             MaLoi: req.body.MaLoi,
             TenLoi: req.body.TenLoi,
             SoLuongLoi: req.body.SoLuongLoi,
